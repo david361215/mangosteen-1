@@ -42,4 +42,26 @@ resource "标签" do
       expect(json['resource']['sign']).to eq sign
     end
   end
+  patch "/api/v1/tags/:id" do
+    let (:tag) { Tag.create name: 'x', sign:'x', user_id: current_user.id }
+    let (:id) { tag.id }
+    parameter :name, '名称'
+    parameter :sign, '符号'
+    with_options :scope => :resource do
+      response_field :id, 'ID'
+      response_field :name, "名称"
+      response_field :sign, "符号"
+      response_field :user_id, "用户ID"
+      response_field :deleted_at, "删除时间"
+    end
+    let (:name) { 'y' }
+    let (:sign) { 'y' }
+    example "修改标签" do
+      do_request
+      expect(status).to eq 200
+      json = JSON.parse response_body
+      expect(json['resource']['name']).to eq name
+      expect(json['resource']['sign']).to eq sign
+    end
+  end
 end
