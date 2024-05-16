@@ -26,13 +26,25 @@ class Api::V1::ItemsController < ApplicationController
       .where(kind: params[:kind])
       .where(happened_at: params[:happened_after]..params[:happened_before])
     items.each do |item|
-      key = item.happened_at.in_time_zone('Beijing').strftime('%F')
-      hash[key] ||= 0
-      hash[key] += item.amount
+      if params[:group_by] == 'happened_at'
+        key = item.happened_at.in_time_zone('Beijing').strftime('%F')
+        hash[key] ||= 0
+        hash[key] += item.amount
+      else
+        item.tags_id.each do |tag_id|
+          key = tag_id
+          hash[key] ||= 0
+          hash[key] += item.amount
+        end
+      end
     end
     groups = hash
-      .map { |key, value| {"happened_at": key, amount: value} }
-      .sort { |a, b| a[:happened_at] <=> b[:happened_at] }
+    .map { |key, value| {"#{params[:group_by]}": key, amount: value} }
+    if params[:group_by] == 'happened_at'
+      groups.sort! { |a, b| a[:happened_at] <=> b[:happened_at] }
+    elsif params[:group_by] == 'tag_id'
+      groups.sort! { |a, b| b[:amount] <=> a[:amount] }
+    end
     render json: {
       groups: groups,
       total: items.sum(:amount)
