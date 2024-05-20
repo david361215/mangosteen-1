@@ -1,3 +1,4 @@
+require 'action_dispatch/middleware/static'
 Rails.application.routes.draw do
   get '/', to: 'home#index'
 

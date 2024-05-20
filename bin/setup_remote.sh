@@ -26,7 +26,7 @@ function title {
 title '设置远程机器的环境变量'
 set_env DB_HOST
 set_env DB_PASSWORD
-set_env RAILS_MASTER_KEY
+set_env RAILS_MASTER_KEY '请将 config/credentials/production.key 的内容复制到这里'
 
 title '创建数据库'
 if [ "$(docker ps -aq -f name=^${DB_HOST}$)" ]; then
