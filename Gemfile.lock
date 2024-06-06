@@ -86,6 +86,13 @@ GEM
       reline (>= 0.3.1)
     diff-lcs (1.5.0)
     erubi (1.11.0)
+    factory_bot (6.4.6)
+      activesupport (>= 5.0.0)
+    factory_bot_rails (6.4.3)
+      factory_bot (~> 6.4)
+      railties (>= 5.0.0)
+    faker (3.4.1)
+      i18n (>= 1.8.11, < 2)
     globalid (1.0.0)
       activesupport (>= 5.0)
     i18n (1.12.0)
@@ -205,6 +212,8 @@ PLATFORMS
 DEPENDENCIES
   bootsnap
   debug
+  factory_bot_rails
+  faker
   jwt
   kaminari
   pg (~> 1.1)

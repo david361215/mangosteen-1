@@ -7,10 +7,10 @@ RSpec.describe "Api::V1::Tags", type: :request do
       expect(response).to have_http_status(401)
     end
     it "登录后获取标签" do
-      user = User.create email: '1@qq.com'
-      another_user = User.create email: '2@qq.com'
-      11.times do |i| Tag.create name: "tag#{i}", user_id: user.id, sign: 'x' end
-      11.times do |i| Tag.create name: "tag#{i}", user_id: another_user.id, sign: 'x' end
+      user = User.create email: "1@qq.com"
+      another_user = User.create email: "2@qq.com"
+      11.times do |i| create :tag, name: "tag#{i}", user: user end
+      11.times do |i| create :tag, name: "tag#{i}", sign: "x" end
 
       get '/api/v1/tags', headers: user.generate_auth_header
       expect(response).to have_http_status(200)
