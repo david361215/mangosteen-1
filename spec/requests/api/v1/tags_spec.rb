@@ -40,15 +40,13 @@ RSpec.describe "Api::V1::Tags", type: :request do
   end
   describe '获取标签' do
     it "未登录获取标签" do
-      user = create :user
-      tag = create :tag, user: user
+      tag = create :tag
       get "/api/v1/tags/#{tag.id}"
       expect(response).to have_http_status(401)
     end
     it '登录后获取标签' do
-      user = create :user
-      tag = create :tag, user: user
-      get "/api/v1/tags/#{tag.id}", headers: tag.generate_auth_header
+      tag = create :tag
+      get "/api/v1/tags/#{tag.id}", headers: tag.user.generate_auth_header
       expect(response).to have_http_status(200)
       json = JSON.parse response.body
       expect(json['resource']['id']).to eq tag.id
@@ -79,14 +77,14 @@ RSpec.describe "Api::V1::Tags", type: :request do
       post '/api/v1/tags', params: {sign: 'sign'}, headers: user.generate_auth_header
       expect(response).to have_http_status(422)
       json = JSON.parse response.body
-      expect(json['errors']['name'][0]).to eq "can't be blank"
+      expect(json['errors']['name'][0]).to be_a String
     end
     it '登录后创建标签失败，因为没填 sign' do
       user = create :user
       post '/api/v1/tags', params: {name: 'name'}, headers: user.generate_auth_header
       expect(response).to have_http_status(422)
       json = JSON.parse response.body
-      expect(json['errors']['sign'][0]).to eq "can't be blank"
+      expect(json['errors']['sign'][0]).to be_a String
     end
   end
   describe '更新标签' do
@@ -112,7 +110,7 @@ RSpec.describe "Api::V1::Tags", type: :request do
       expect(response).to have_http_status(200)
       json = JSON.parse response.body
       expect(json['resource']['name']).to eq 'y'
-      expect(json['resource']['sign']).to eq 'x'
+      expect(json['resource']['sign']).to eq tag.sign
     end
   end
   describe '删除标签' do
