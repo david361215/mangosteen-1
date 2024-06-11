@@ -65,6 +65,17 @@ RSpec.describe "Items", type: :request do
       expect(json['resources'].size).to eq 1
       expect(json['resources'][0]['id']).to eq item1.id
     end
+    it "按 kind 筛选" do
+      user = create :user
+      create :item, kind: 'income', amount: 200, user: user
+      create :item, kind: 'expenses', amount: 100, user: user
+
+      get "/api/v1/items?kind=income", headers: user.generate_auth_header
+      expect(response).to have_http_status 200
+      json = JSON.parse(response.body)
+      expect(json["resources"].size).to eq 1
+      expect(json["resources"][0]["amount"]).to eq 200
+    end
   end
   describe "创建账目" do
     it '未登录创建' do 
@@ -77,7 +88,7 @@ RSpec.describe "Items", type: :request do
       tag2 = create :tag, user: user
       expect {
         post '/api/v1/items', 
-        params: {amount: 99, tag_ids: [tag1.id,tag2.id], happened_at: '2018-01-01T00:00:00+08:00'}, 
+        params: {amount: 99, tag_ids: [tag1.id,tag2.id], happened_at: '2018-01-01T00:00:00+08:00', kind: 'income'}, 
         headers: user.generate_auth_header
       }.to change { Item.count }.by 1
       expect(response).to have_http_status 200
@@ -86,6 +97,7 @@ RSpec.describe "Items", type: :request do
       expect(json['resource']['amount']).to eq 99
       expect(json['resource']['user_id']).to eq user.id
       expect(json['resource']['happened_at']).to eq '2017-12-31T16:00:00.000Z'
+      expect(json["resource"]["kind"]).to eq "income"
     end
     it "创建时 amount、tag_ids、happened_at 必填" do
       user = create :user
