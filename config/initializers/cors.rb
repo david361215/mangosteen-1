@@ -14,3 +14,14 @@
 #       methods: [:get, :post, :put, :patch, :delete, :options, :head]
 #   end
 # end
+
+Rails.application.config.middleware.insert_before 0, Rack::Cors do
+  allow do
+    origins '8.138.147.80:8080'
+    resource '*',
+        methods: [:get, :post, :delete, :patch, :options, :head],
+        headers: :any,
+        expose: ['*', 'Authorization'],
+        max_age: 600
+  end
+end
