@@ -70,7 +70,7 @@ RSpec.describe "Items", type: :request do
     it "按 kind 筛选" do
       user = create :user
       create :item, kind: 'income', amount: 200, user: user
-      create :item, kind: 'expenses', amount: 100, user: user
+      create :item, kind: 'expense', amount: 100, user: user
 
       get "/api/v1/items?kind=income", headers: user.generate_auth_header
       expect(response).to have_http_status 200
@@ -101,7 +101,7 @@ RSpec.describe "Items", type: :request do
       expect(json["resource"]["happened_at"]).to eq "2018-01-01T00:00:00.000+08:00"
       expect(json["resource"]["kind"]).to eq "income"
     end
-    it "创建时 amount、tag_ids、happened_at 必填" do
+    it "创建时 amount、kind、tag_ids、happened_at 必填" do
       user = create :user
       post '/api/v1/items', params: {}, headers: user.generate_auth_header
       expect(response).to have_http_status 422
@@ -109,41 +109,42 @@ RSpec.describe "Items", type: :request do
       expect(json['errors']['amount'][0]).to be_a String
       expect(json['errors']['tag_ids'][0]).to be_a String
       expect(json['errors']['happened_at'][0]).to be_a String
+      expect(json['errors']['kind'][0]).to be_a String
     end
   end
   describe "获取余额" do
     it "未登录" do
-      get "/api/v1/items/balance?happen_after=2018-01-01&happen_before=2019-01-01"
+      get "/api/v1/items/balance?happened_after=2018-01-01&happened_before=2019-01-01"
       expect(response).to have_http_status 401
     end
     it "登录" do
       user = create :user
-      create :item, user: user, kind: 'expenses', amount: 100, happened_at: '2018-03-02T16:00:00.000Z'
-      create :item, user: user, kind: 'expenses', amount: 200, happened_at: '2018-03-02T16:00:00.000Z'
+      create :item, user: user, kind: 'expense', amount: 100, happened_at: '2018-03-02T16:00:00.000Z'
+      create :item, user: user, kind: 'expense', amount: 200, happened_at: '2018-03-02T16:00:00.000Z'
       create :item, user: user, kind: 'income', amount: 100, happened_at: '2018-03-02T16:00:00.000Z'
       create :item, user: user, kind: 'income', amount: 200, happened_at: '2018-03-02T16:00:00.000Z'
 
-      get "/api/v1/items/balance?happen_after=2018-03-02T15:00:00.000Z&happen_before=2018-03-02T17:00:00.000Z", headers: user.generate_auth_header
+      get "/api/v1/items/balance?happened_after=2018-03-02T15:00:00.000Z&happened_before=2018-03-02T17:00:00.000Z", headers: user.generate_auth_header
       expect(response).to have_http_status 200
       json = JSON.parse(response.body)
       expect(json["income"]).to eq 300
-      expect(json["expenses"]).to eq 300
+      expect(json["expense"]).to eq 300
       expect(json["balance"]).to eq 0
     end
   end
   describe "统计数据" do 
     it '按天分组' do
       user = create :user
-      create :item, amount: 100, kind: "expenses", happened_at: "2018-06-18T00:00:00+08:00", user: user
-      create :item, amount: 200, kind: "expenses", happened_at: "2018-06-18T00:00:00+08:00", user: user
-      create :item, amount: 100, kind: "expenses", happened_at: "2018-06-20T00:00:00+08:00", user: user
-      create :item, amount: 200, kind: "expenses", happened_at: "2018-06-20T00:00:00+08:00", user: user
-      create :item, amount: 100, kind: "expenses", happened_at: "2018-06-19T00:00:00+08:00", user: user
-      create :item, amount: 200, kind: "expenses", happened_at: "2018-06-19T00:00:00+08:00", user: user
+      create :item, amount: 100, kind: "expense", happened_at: "2018-06-18T00:00:00+08:00", user: user
+      create :item, amount: 200, kind: "expense", happened_at: "2018-06-18T00:00:00+08:00", user: user
+      create :item, amount: 100, kind: "expense", happened_at: "2018-06-20T00:00:00+08:00", user: user
+      create :item, amount: 200, kind: "expense", happened_at: "2018-06-20T00:00:00+08:00", user: user
+      create :item, amount: 100, kind: "expense", happened_at: "2018-06-19T00:00:00+08:00", user: user
+      create :item, amount: 200, kind: "expense", happened_at: "2018-06-19T00:00:00+08:00", user: user
       get '/api/v1/items/summary', params: {
         happened_after: '2018-01-01',
         happened_before: '2019-01-01',
-        kind: 'expenses',
+        kind: 'expense',
         group_by: 'happened_at'
       }, headers: user.generate_auth_header
       expect(response).to have_http_status 200
@@ -162,13 +163,13 @@ RSpec.describe "Items", type: :request do
       tag1 = create :tag, user: user
       tag2 = create :tag, user: user
       tag3 = create :tag, user: user
-      create :item, amount: 100, kind: "expenses", tag_ids: [tag1.id, tag2.id], happened_at: "2018-06-18T00:00:00+08:00", user: user
-      create :item, amount: 200, kind: "expenses", tag_ids: [tag2.id, tag3.id], happened_at: "2018-06-18T00:00:00+08:00", user: user
-      create :item, amount: 300, kind: "expenses", tag_ids: [tag3.id, tag1.id], happened_at: "2018-06-18T00:00:00+08:00", user: user
+      create :item, amount: 100, kind: "expense", tag_ids: [tag1.id, tag2.id], happened_at: "2018-06-18T00:00:00+08:00", user: user
+      create :item, amount: 200, kind: "expense", tag_ids: [tag2.id, tag3.id], happened_at: "2018-06-18T00:00:00+08:00", user: user
+      create :item, amount: 300, kind: "expense", tag_ids: [tag3.id, tag1.id], happened_at: "2018-06-18T00:00:00+08:00", user: user
       get '/api/v1/items/summary', params: {
         happened_after: '2018-01-01',
         happened_before: '2019-01-01',
-        kind: 'expenses',
+        kind: 'expense',
         group_by: 'tag_id'
       }, headers: user.generate_auth_header
       expect(response).to have_http_status 200

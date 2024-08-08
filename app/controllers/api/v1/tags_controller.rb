@@ -2,8 +2,9 @@ class Api::V1::TagsController < ApplicationController
   def index
     current_user = User.find request.env['current_user_id']
     return render status: :not_found  if current_user.nil?  
-    tags = Tag.where(user_id: current_user.id).page(params[:page])
+    tags = Tag.where(user_id: current_user.id)
     tags = tags.where(kind: params[:kind]) unless params[:kind].nil?
+    tags = tags.page(params[:page])
     render json: {resources: tags, pager: {
       page: params[:page] || 1,
       per_page: Tag.default_per_page,
@@ -20,7 +21,7 @@ class Api::V1::TagsController < ApplicationController
     return render status: :not_found  if current_user.nil?  
 
     tag = Tag.new params.permit(:name, :sign, :kind)
-    tag.user = current_user
+    tag.user_id = current_user.id
     if tag.save
       render json: {resource: tag}, status: :ok
     else
@@ -29,6 +30,7 @@ class Api::V1::TagsController < ApplicationController
   end
   def update
     tag = Tag.find params[:id]
+    return head :forbidden unless tag.user_id == request.env['current_user_id']
     tag.update params.permit(:name, :sign)
     if tag.errors.empty?
       render json: {resource: tag}

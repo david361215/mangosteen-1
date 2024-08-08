@@ -24,15 +24,15 @@ RSpec.describe "Api::V1::Tags", type: :request do
     end
     it '根据 kind 获取标签' do
       user = create :user
-      create_list :tag, Tag.default_per_page+1, user: user, kind: 'expenses'
+      create_list :tag, Tag.default_per_page+1, user: user, kind: 'expense'
       create_list :tag, Tag.default_per_page+1, user: user, kind: 'income'
 
-      get '/api/v1/tags', headers: user.generate_auth_header, params: {kind: 'expenses'}
+      get '/api/v1/tags', headers: user.generate_auth_header, params: {kind: 'expense'}
       expect(response).to have_http_status(200)
       json = JSON.parse response.body
       expect(json['resources'].size).to eq Tag.default_per_page
 
-      get '/api/v1/tags', headers: user.generate_auth_header, params: {kind: 'expenses', page: 2}
+      get '/api/v1/tags', headers: user.generate_auth_header, params: {kind: 'expense', page: 2}
       expect(response).to have_http_status(200)
       json = JSON.parse response.body
       expect(json['resources'].size).to eq 1
@@ -66,7 +66,7 @@ RSpec.describe "Api::V1::Tags", type: :request do
     end
     it '登录后创建标签' do
       user = create :user
-      post '/api/v1/tags', params: {name: 'name', sign: 'sign', kind: 'expenses'}, headers: user.generate_auth_header
+      post '/api/v1/tags', params: {name: 'name', sign: 'sign', kind: 'expense'}, headers: user.generate_auth_header
       expect(response).to have_http_status(200)
       json = JSON.parse response.body
       expect(json['resource']['name']).to eq 'name'

@@ -1,6 +1,6 @@
 class Item < ApplicationRecord
   paginates_per 25
-  enum kind: { expenses: 1, income: 2 }
+  enum kind: { expense: 1, income: 2 }
   validates :amount, presence: true
   validates :amount, numericality: { other_than: 0 }
   validates :kind, presence: true

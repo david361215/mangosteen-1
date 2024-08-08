@@ -15,6 +15,8 @@ class Api::V1::ItemsController < ApplicationController
     }}, methods: :tags
   end
   def create
+    current_user = User.find request.env['current_user_id']
+    return render status: :not_found  if current_user.nil?  
     item = Item.new params.permit(:amount, :happened_at, :kind, tag_ids: [] )   
     item.user_id = request.env['current_user_id']
     if item.save
@@ -29,17 +31,17 @@ class Api::V1::ItemsController < ApplicationController
     items = Item.where({user_id: current_user_id })
       .where({happened_at: params[:happened_after]..params[:happened_before] })
     income_items = []
-    expenses_items = []
+    expense_items = []
     items.each{ |item|
       if item.kind === 'income'
         income_items << item
       else 
-        expenses_items << item
+        expense_items << item
       end
     }
     income = income_items.sum(&:amount)
-    expenses = expenses_items.sum(&:amount)
-    render json: {income: income, expenses: expenses, balance: income - expenses}
+    expense = expense_items.sum(&:amount)
+    render json: {income: income, expense: expense, balance: income - expense}
   end
   def summary
     hash = Hash.new

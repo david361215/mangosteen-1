@@ -24,7 +24,7 @@ resource "标签" do
   end
   get "/api/v1/tags" do
     parameter :page, '页码'
-    parameter :kind, '类型', in: ['expenses', 'income']
+    parameter :kind, '类型', in: ['expense', 'income']
     with_options :scope => :resources do
       response_field :id, 'ID'
       response_field :name, "名称"
@@ -43,7 +43,7 @@ resource "标签" do
   post "/api/v1/tags" do
     parameter :name, '名称', required: true
     parameter :sign, '符号', required: true
-    parameter :kind, '类型', required: true, in: ['expenses', 'income']
+    parameter :kind, '类型', required: true, in: ['expense', 'income']
     with_options :scope => :resource do
       response_field :id, 'ID'
       response_field :name, "名称"
